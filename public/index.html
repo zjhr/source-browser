@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>货源查询</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app">
+      <section class="login-panel" id="loginPanel">
+        <div class="brand">
+          <span class="brand-mark">货</span>
+          <div>
+            <h1>货源查询</h1>
+            <p>登录商户后台后查询分销货源，优先显示有货商品并按价格排序。</p>
+          </div>
+        </div>
+
+        <form id="loginForm" class="stack">
+          <label>
+            <span>平台</span>
+            <select id="loginPlatform" name="platform">
+              <option value="ldxp" selected>链动小店</option>
+              <option value="catfk">云猫寄售</option>
+            </select>
+          </label>
+          <label>
+            <span>用户名</span>
+            <input id="username" name="username" autocomplete="username" required>
+          </label>
+          <label>
+            <span>密码</span>
+            <input id="password" name="password" type="password" autocomplete="current-password" required>
+          </label>
+          <button class="primary" type="submit">登录</button>
+        </form>
+      </section>
+
+      <section class="workbench hidden" id="workbench">
+        <header class="topbar">
+          <div>
+            <h1>货源查询</h1>
+            <p id="accountText">已登录</p>
+          </div>
+          <button class="ghost" id="logoutButton" type="button">退出</button>
+        </header>
+
+        <form id="searchForm" class="toolbar">
+          <label class="search-box">
+            <span>关键词</span>
+            <input id="keywords" name="keywords" placeholder="例如 gpt" value="gpt">
+          </label>
+          <label>
+            <span>类型</span>
+            <select id="goodsType" name="goodsType">
+              <option value="card">卡密</option>
+              <option value="">全部</option>
+            </select>
+          </label>
+          <label>
+            <span>每页</span>
+            <select id="pageSize" name="pageSize">
+              <option>20</option>
+              <option>50</option>
+              <option>100</option>
+            </select>
+          </label>
+          <label>
+            <span>范围</span>
+            <select id="pages" name="pages">
+              <option value="1">当前页</option>
+              <option value="5">前 5 页</option>
+              <option value="10">前 10 页</option>
+              <option value="all" selected>全部页</option>
+            </select>
+          </label>
+          <label>
+            <span>排序</span>
+            <select id="sortMode" name="sortMode">
+              <option value="stock-price-asc">有货优先，价格低到高</option>
+              <option value="stock-price-desc">有货优先，价格高到低</option>
+              <option value="price-asc">仅价格低到高</option>
+              <option value="price-desc">仅价格高到低</option>
+            </select>
+          </label>
+          <label>
+            <span>筛选</span>
+            <select id="availabilityFilter" name="availabilityFilter">
+              <option value="available" selected>只看可售</option>
+              <option value="listed">已上架</option>
+              <option value="all">全部</option>
+            </select>
+          </label>
+          <label class="price-range">
+            <span>价格</span>
+            <div class="range-inputs">
+              <input id="minPrice" name="minPrice" type="number" min="0" step="0.01" placeholder="最低">
+              <input id="maxPrice" name="maxPrice" type="number" min="0" step="0.01" placeholder="最高">
+            </div>
+          </label>
+          <label class="block-keywords">
+            <span>屏蔽词</span>
+            <input id="blockKeywords" name="blockKeywords" placeholder="free, 镜像, 中转">
+          </label>
+          <button class="primary" type="submit">查询</button>
+        </form>
+        <div class="toolbar-help">
+          <strong>屏蔽词添加格式：</strong>
+          <span>free, 镜像, 中转</span>
+          <em>每个关键词用逗号隔开，命中商品名的结果会被隐藏。</em>
+        </div>
+
+        <div class="summary">
+          <span id="summaryText">等待查询</span>
+          <div class="pager">
+            <label class="page-size-control">
+              <span>显示</span>
+              <select id="localPageSize">
+                <option value="50" selected>50 条</option>
+                <option value="100">100 条</option>
+                <option value="200">200 条</option>
+              </select>
+            </label>
+            <button class="ghost" id="prevPage" type="button">上一页</button>
+            <span id="pageText">第 1 页</span>
+            <button class="ghost" id="nextPage" type="button">下一页</button>
+            <button class="ghost hidden" id="cancelSearch" type="button">停止</button>
+          </div>
+        </div>
+
+        <section class="progress-panel hidden" id="progressPanel">
+          <div class="progress-line">
+            <span id="progressText">准备查询</span>
+            <span id="progressMeta"></span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+        </section>
+
+        <section class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>货源</th>
+                <th>状态</th>
+                <th>库存</th>
+                <th>价格</th>
+                <th>标识</th>
+                <th>详情</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody">
+              <tr>
+                <td colspan="6" class="empty">输入关键词后查询</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </section>
+
+      <div class="toast hidden" id="toast"></div>
+    </main>
+    <script src="/app.js"></script>
+  </body>
+</html>

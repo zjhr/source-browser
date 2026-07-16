@@ -1,0 +1,8 @@
+data/
+*.zip
+report*.md
+.env
+.env.*
+!.env.example
+node_modules/
+npm-debug.log*
