@@ -260,8 +260,32 @@ async function postRemote(endpoint, payload, session, refererPath, options = {})
       let data;
       try {
         data = JSON.parse(text);
-      } catch {
-        throw new RemoteHttpError(`远端返回非 JSON 内容，HTTP ${response.status}`, response.status, null);
+      } catch (parseError) {
+        // 构造脱敏 headers 副本
+        const headersObj = {};
+        try {
+          for (const [k, v] of response.headers.entries()) {
+            const key = String(k).toLowerCase();
+            if (key === 'authorization' || key === 'merchant-token' || key.includes('cookie')) {
+              headersObj[k] = '[REDACTED]';
+            } else {
+              headersObj[k] = v;
+            }
+          }
+        } catch (e) {
+          // ignore header parsing errors
+        }
+
+        const snippet = (typeof text === 'string' ? text.slice(0, 2000) : String(text)).replace(/[\r\n]+/g, ' ');
+        console.error('Remote non-JSON response', {
+          url: `${platform.baseUrl}${endpoint}`,
+          status: response.status,
+          headers: headersObj,
+          bodySnippet: snippet
+        });
+
+        // 抛出并附带原始 body 片段（以便在部署日志或错误追踪中看见）
+        throw new RemoteHttpError(`远端返回非 JSON 内容，HTTP ${response.status}`, response.status, { bodySnippet: snippet });
       }
 
       if (!response.ok) {
@@ -575,7 +599,7 @@ async function handleSearchCancel(req, res) {
 function serveStatic(req, res) {
   const url = new URL(req.url, "http://localhost");
   const requested = url.pathname === "/" ? "/index.html" : url.pathname;
-  const normalized = path.normalize(decodeURIComponent(requested)).replace(/^(\.\.[/\\])+/, "");
+  const normalized = path.normalize(decodeURIComponent(requested)).replace(/^(.\.\.[/\\])+/, "");
   const filePath = path.join(PUBLIC_DIR, normalized);
 
   if (!filePath.startsWith(PUBLIC_DIR)) {
